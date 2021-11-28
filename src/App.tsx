@@ -18,7 +18,7 @@ const theme = createTheme({
 function App() {
   return (
     <ThemeProvider theme={theme}>
-      <Navigation />
+      <Navigation/>
       <Container component="main" maxWidth="lg" sx={{ mt: 4 }}>
         <CssBaseline/>
         <BrowserRouter>
