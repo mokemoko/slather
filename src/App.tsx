@@ -18,17 +18,17 @@ const theme = createTheme({
 function App() {
   return (
     <ThemeProvider theme={theme}>
-      <Navigation/>
-      <Container component="main" maxWidth="lg" sx={{ mt: 4 }}>
-        <CssBaseline/>
-        <BrowserRouter>
+      <BrowserRouter>
+        <Navigation/>
+        <Container component="main" maxWidth="lg" sx={{ mt: 4 }}>
+          <CssBaseline/>
           <Routes>
             <Route path="/" element={<Top/>}/>
             <Route path="/detail/:id" element={<Detail/>}/>
             <Route path="/edit/:id" element={<Edit/>}/>
           </Routes>
-        </BrowserRouter>
-      </Container>
+        </Container>
+      </BrowserRouter>
     </ThemeProvider>
   )
 }

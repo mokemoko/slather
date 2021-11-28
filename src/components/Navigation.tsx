@@ -1,32 +1,60 @@
-import { AppBar, Avatar, Button, IconButton, Toolbar, Typography } from '@mui/material'
+import { AppBar, Button, Snackbar, Toolbar, Tooltip, Typography, Alert } from '@mui/material'
+import { Edit, List } from '@mui/icons-material'
 import React, { useState } from 'react'
+import { useRecoilState } from 'recoil'
+import { userState } from '../services/state'
+import UserMenu from './UserMenu'
+import { useNavigate } from 'react-router-dom'
 
 const Navigation = (): JSX.Element => {
-  const [user, setUser] = useState<Record<string, any> | null>(null)
+  const [user] = useRecoilState(userState)
+  const [isOpenAlert, setIsOpenAlert] = useState(false)
+  const navigate = useNavigate()
+
+  const handleClickCreate = () => {
+    if (user) {
+      navigate('/edit/new')
+    } else {
+      setIsOpenAlert(true)
+    }
+  }
 
   return (
-    <AppBar position="static" elevation={0}>
-      <Toolbar>
-        <Typography variant="h6" sx={{ flexGrow: 1 }}>
-          Slather
-        </Typography>
-        {user ? (
-          <IconButton
-            color="inherit"
-            onClick={() => setUser(null)}
-          >
-            <Avatar/>
-          </IconButton>
-        ) : (
+    <>
+      <AppBar position="static" elevation={0}>
+        <Toolbar>
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            Slather
+          </Typography>
           <Button
             color="inherit"
-            onClick={() => setUser({})}
+            startIcon={<List/>}
+            onClick={() => navigate('/')}
+            sx={{ mr: 2 }}
           >
-            Login
+            一覧を見る
           </Button>
-        )}
-      </Toolbar>
-    </AppBar>
+          <Button
+            color="inherit"
+            startIcon={<Edit/>}
+            onClick={handleClickCreate}
+          >
+            まとめを作成する
+          </Button>
+          <UserMenu/>
+        </Toolbar>
+      </AppBar>
+      <Snackbar
+        open={isOpenAlert}
+        autoHideDuration={5000}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        onClose={() => setIsOpenAlert(false)}
+      >
+        <Alert severity="warning" sx={{ width: '100%' }}>
+          Githubでログインするとまとめを作成できます
+        </Alert>
+      </Snackbar>
+    </>
   )
 }
 
