@@ -1,31 +1,35 @@
-import React, { useState } from 'react'
-import logo from './logo.svg'
-import './App.css'
+import React from 'react'
+import Edit from './pages/Edit'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import Detail from './pages/Detail'
+import Top from './pages/Top'
+import { Container, createTheme, CssBaseline, ThemeProvider } from '@mui/material'
+import { grey } from '@mui/material/colors'
+import Navigation from './components/Navigation'
+
+const theme = createTheme({
+  palette: {
+    background: {
+      default: grey.A100,
+    },
+  },
+})
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>Hello Vite + React!</p>
-        <p>
-          <button onClick={() => setCount(count => count + 1)}>count is: {count}</button>
-        </p>
-        <p>
-          Edit <code>App.tsx</code> and save to test HMR updates.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ThemeProvider theme={theme}>
+      <Navigation />
+      <Container component="main" maxWidth="lg" sx={{ mt: 4 }}>
+        <CssBaseline/>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Top/>}/>
+            <Route path="/detail/:id" element={<Detail/>}/>
+            <Route path="/edit/:id" element={<Edit/>}/>
+          </Routes>
+        </BrowserRouter>
+      </Container>
+    </ThemeProvider>
   )
 }
 
