@@ -1,5 +1,6 @@
 export interface UserServiceInfo {
   id: string
+  team: string
   name: string
   image: string
   token: string

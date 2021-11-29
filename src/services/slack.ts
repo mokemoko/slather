@@ -1,14 +1,25 @@
 import { AuthTestResponse, ConversationsHistoryResponse, UsersProfileGetResponse } from '@slack/web-api'
 import axios from 'axios'
 import { UserServiceInfo } from '../models/user'
+import { get, set } from '../utils/cache'
+import { message2vm } from '../models/message'
 
 const baseUrl = 'https://slack.com/api/'
 
+interface SlackUserInfo {
+  username: string
+  icons: {
+    image_64: string
+  }
+}
+
 class Slack {
+  team: string
   token: string
 
-  constructor(token: string) {
-    this.token = token
+  constructor(info: UserServiceInfo) {
+    this.team = info.team
+    this.token = info.token
   }
 
   async post<T>(method: string, params: any) {
@@ -20,18 +31,39 @@ class Slack {
     return res.data
   }
 
-  async fetchUserInfo(): Promise<UserServiceInfo> {
-    const profileRes = await this.post<UsersProfileGetResponse>('users.profile.get', {})
-    const authRes = await this.post<AuthTestResponse>('auth.test', {})
-    if (profileRes.ok && authRes.ok) {
+  async fetchUserInfo(user: string) {
+    const cache = get<SlackUserInfo>(user)
+    if (cache) {
+      return cache
+    }
+    const res = await this.post<UsersProfileGetResponse>('users.profile.get', { user })
+    if (res.ok) {
+      const info = {
+        username: res.profile?.display_name,
+        icons: {
+          image_64: res.profile?.image_48,
+        },
+      }
+      set(user, info)
+      return info
+    } else {
+      throw res.error
+    }
+  }
+
+  async checkAuth(): Promise<UserServiceInfo> {
+    const res = await this.post<AuthTestResponse>('auth.test', {})
+    if (res.ok) {
+      const userInfo = await this.fetchUserInfo(res.user_id!)
       return {
-        id: authRes.user_id!,
-        name: profileRes.profile?.display_name || '',
-        image: profileRes.profile?.image_48 || '',
+        id: res.user_id!,
+        team: res.team!,
+        name: userInfo.username || '',
+        image: userInfo.icons.image_64 || '',
         token: this.token,
       }
     } else {
-      throw profileRes.error || authRes.error
+      throw res.error
     }
   }
 
@@ -43,7 +75,12 @@ class Slack {
     }
     const res = await this.post<ConversationsHistoryResponse>('conversations.history', params)
     if (res.ok && res.messages) {
-      return res.messages[0]
+      const [message] = res.messages
+      if (message.user) {
+        const userInfo = this.fetchUserInfo(message.user)
+        Object.assign(message, userInfo)
+      }
+      return message2vm(this.team, channel, message)
     } else {
       throw res.error
     }

@@ -3,7 +3,7 @@ import LRU from 'lru-cache'
 const STORE_KEY = '_SLATHER_DATA'
 const STORE_DELAY = 1000
 
-const cache = new LRU({
+const cache = new LRU<string, any>({
   max: 1000,
   maxAge: 7 * 24 * 60 * 60 * 1000,
 })
@@ -31,12 +31,11 @@ const delayStore = ((ms: number) => {
   }
 })(STORE_DELAY)
 
-const get = (key: string) => {
-  return cache.get(key)
+export const get = <T>(key: string) => {
+  return cache.get(key) as T
 }
 
-const set = (key: string, value: any) => {
-  console.log("set")
+export const set = (key: string, value: any) => {
   cache.set(key, value)
   delayStore()
 }

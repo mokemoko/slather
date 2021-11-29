@@ -27,7 +27,7 @@ const UserMenu = () => {
   const handleEnterToken = async (token: string) => {
     if (currentInput === 'Slack') {
       const client = new Slack(token)
-      const user = await client.fetchUserInfo()
+      const user = await client.checkAuth()
       setUser(user)
     } else {
       // TODO: add
@@ -87,10 +87,12 @@ const UserMenu = () => {
           <ListItemIcon>
             <img src="https://cdn.brandfolder.io/5H442O3W/at/pl546j-7le8zk-6gwiyo/Slack_Mark.svg"/>
           </ListItemIcon>
-          {user ? [
-            <Avatar src={user.image} sx={{ width: 24, height: 24 }}/>,
-            user.name,
-          ] : (
+          {user ? (
+            <>
+              <Avatar src={user.image} sx={{ width: 24, height: 24 }}/>
+              user.name
+            </>
+          ) : (
             <>Slackでログイン</>
           )}
         </MenuItem>
@@ -101,19 +103,22 @@ const UserMenu = () => {
           <ListItemIcon sx={{ justifyContent: 'center' }}>
             <GitHub fontSize="small"/>
           </ListItemIcon>
-          {user?.githubInfo ? [
-            <Avatar src={user.githubInfo.image} sx={{ width: 24, height: 24 }}/>,
-            user.githubInfo.name,
-          ] : (
+          {user?.githubInfo ? (
+            <>
+              <Avatar src={user.githubInfo.image} sx={{ width: 24, height: 24 }}/>
+              user.githubInfo.name
+            </>
+          ) : (
             <>GitHubでログイン</>
           )}
         </MenuItem>
         {user && [
-          <Divider/>,
+          <Divider key={1}/>,
           <MenuItem
+            key={2}
             onClick={() => setUser(null)}
           >
-            <ListItemIcon>
+            <ListItemIcon sx={{ justifyContent: 'center' }}>
               <Logout fontSize="small"/>
             </ListItemIcon>
             ログアウト
