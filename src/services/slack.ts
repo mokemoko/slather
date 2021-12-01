@@ -17,9 +17,16 @@ class Slack {
   team: string
   token: string
 
-  constructor(info: UserServiceInfo) {
-    this.team = info.team
-    this.token = info.token
+  constructor(token: string)
+  constructor(info: UserServiceInfo)
+  constructor(param: string | UserServiceInfo) {
+    if (typeof param === 'string') {
+      this.team = ''
+      this.token = param
+    } else {
+      this.team = param.team
+      this.token = param.token
+    }
   }
 
   async post<T>(method: string, params: any) {
@@ -72,12 +79,13 @@ class Slack {
       channel,
       oldest: ts,
       limit: 1,
+      inclusive: true,
     }
     const res = await this.post<ConversationsHistoryResponse>('conversations.history', params)
     if (res.ok && res.messages) {
       const [message] = res.messages
       if (message.user) {
-        const userInfo = this.fetchUserInfo(message.user)
+        const userInfo = await this.fetchUserInfo(message.user)
         Object.assign(message, userInfo)
       }
       return message2vm(this.team, channel, message)

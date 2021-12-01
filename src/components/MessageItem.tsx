@@ -26,7 +26,7 @@ const MessageItem = ({ message }: Props): JSX.Element => {
             )}
             <Typography variant="body2">{message.date}</Typography>
           </Stack>
-          <Typography variant="body1">{message.text}</Typography>
+          <Typography variant="body1" whiteSpace="pre">{message.text}</Typography>
         </Stack>
       </Stack>
     </Box>
