@@ -18,7 +18,8 @@
     "react-beautiful-dnd": "^13.1.0",
     "react-dom": "^17.0.0",
     "react-router-dom": "^6.0.2",
-    "recoil": "^0.5.2"
+    "recoil": "^0.5.2",
+    "recoil-persist": "^4.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.16.0",
