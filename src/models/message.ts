@@ -1,5 +1,4 @@
 import type { Message as MessageType } from '@slack/web-api/dist/response/ConversationsHistoryResponse'
-import { User } from './user'
 
 export type Message = MessageType
 

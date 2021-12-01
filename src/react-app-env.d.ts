@@ -9,12 +9,12 @@ declare namespace NodeJS {
   interface ProcessEnv {
     /**
      * By default, there are two modes in Vite:
-     * 
+     *
      * * `development` is used by vite and vite serve
      * * `production` is used by vite build
-     * 
+     *
      * You can overwrite the default mode used for a command by passing the --mode option flag.
-     * 
+     *
      */
     readonly NODE_ENV: 'development' | 'production'
   }
@@ -71,4 +71,17 @@ declare module '*.module.scss' {
 declare module '*.module.sass' {
   const classes: { readonly [key: string]: string }
   export default classes
+}
+
+/// <reference types="vite/client" />
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv
+}
+
+interface ImportMetaEnv {
+  readonly VITE_GITHUB_API_BASE: string
+  readonly VITE_GITHUB_ORGANIZATION: string
+  readonly VITE_GITHUB_REPOSITORY: string
+  readonly VITE_GITHUB_PAGES_BASE: string
 }
