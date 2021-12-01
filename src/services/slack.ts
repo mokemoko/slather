@@ -6,7 +6,7 @@ import { message2vm } from '../models/message'
 
 const baseUrl = 'https://slack.com/api/'
 
-interface SlackUserInfo {
+export interface SlackUserInfo {
   username: string
   icons: {
     image_64: string
@@ -38,7 +38,7 @@ class Slack {
     return res.data
   }
 
-  async fetchUserInfo(user: string) {
+  async fetchUserInfo(user: string): Promise<SlackUserInfo> {
     const cache = get<SlackUserInfo>(user)
     if (cache) {
       return cache
@@ -46,9 +46,9 @@ class Slack {
     const res = await this.post<UsersProfileGetResponse>('users.profile.get', { user })
     if (res.ok) {
       const info = {
-        username: res.profile?.display_name,
+        username: res.profile?.display_name || '',
         icons: {
-          image_64: res.profile?.image_48,
+          image_64: res.profile?.image_48 || '',
         },
       }
       set(user, info)
