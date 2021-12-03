@@ -2,7 +2,7 @@ import { AuthTestResponse, ConversationsHistoryResponse, UsersProfileGetResponse
 import axios from 'axios'
 import { UserServiceInfo } from '../models/user'
 import { get, set } from '../utils/cache'
-import { message2vm } from '../models/message'
+import { message2vm, Message } from '../models/message'
 
 const baseUrl = 'https://slack.com/api/'
 
@@ -75,23 +75,30 @@ class Slack {
   }
 
   async fetchMassage(channel: string, ts: string) {
-    const params = {
-      channel,
-      oldest: ts,
-      limit: 1,
-      inclusive: true,
-    }
-    const res = await this.post<ConversationsHistoryResponse>('conversations.history', params)
-    if (res.ok && res.messages) {
-      const [message] = res.messages
-      if (message.user) {
-        const userInfo = await this.fetchUserInfo(message.user)
-        Object.assign(message, userInfo)
+    const key = `${channel}.${ts}`
+    let message = get<Message>(key)
+    if (!message) {
+      const params = {
+        channel,
+        oldest: ts,
+        limit: 1,
+        inclusive: true,
       }
-      return message2vm(this.team, channel, message)
-    } else {
-      throw res.error
+      const res = await this.post<ConversationsHistoryResponse>('conversations.history', params)
+      if (res.ok && res.messages) {
+        const [_message] = res.messages
+        if (_message.user) {
+          const userInfo = await this.fetchUserInfo(_message.user)
+          Object.assign(_message, userInfo)
+        }
+        message = _message
+        // TODO: 必要な項目のみ抽出
+        set(key, message)
+      } else {
+        throw res.error
+      }
     }
+    return message2vm(this.team, channel, message)
   }
 
   async fetchMessageFromUrl(url: string) {

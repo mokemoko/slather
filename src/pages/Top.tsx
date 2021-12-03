@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import {
   Alert,
   Grid,
@@ -9,19 +9,17 @@ import { userState } from '../services/state'
 import GitHub from '../services/github'
 import type { FeedViewModel } from '../models/feed'
 import { FeedItem, FeedItemSkeleton } from '../components/FeedItem'
+import { useAsyncEffect } from '../utils/hook'
 
 const Top = (): JSX.Element => {
   const [user] = useRecoilState(userState)
   const [feeds, setFeeds] = useState<FeedViewModel[]>([])
 
-  useEffect(() => {
-    (async () => {
-      if (!user) {
-        return
-      }
-      const github = new GitHub(user)
-      setFeeds(await github.fetchFeeds())
-    })()
+  useAsyncEffect(async () => {
+    if (!user) return
+
+    const github = new GitHub(user)
+    setFeeds(await github.fetchFeeds())
   }, [user])
 
   return (

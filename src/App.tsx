@@ -6,6 +6,7 @@ import Top from './pages/Top'
 import { Container, createTheme, CssBaseline, ThemeProvider } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import Navigation from './components/Navigation'
+import ErrorBoundary from './components/ErrorBoundary'
 
 const theme = createTheme({
   palette: {
@@ -18,17 +19,19 @@ const theme = createTheme({
 function App() {
   return (
     <ThemeProvider theme={theme}>
-      <BrowserRouter>
-        <Navigation/>
-        <Container component="main" maxWidth="lg" sx={{ mt: 4 }}>
-          <CssBaseline/>
-          <Routes>
-            <Route path="/" element={<Top/>}/>
-            <Route path="/detail/:id" element={<Detail/>}/>
-            <Route path="/edit/:id" element={<Edit/>}/>
-          </Routes>
-        </Container>
-      </BrowserRouter>
+      <ErrorBoundary>
+        <BrowserRouter>
+          <Navigation/>
+          <Container component="main" maxWidth="lg" sx={{ mt: 4 }}>
+            <CssBaseline/>
+            <Routes>
+              <Route path="/" element={<Top/>}/>
+              <Route path="/detail/:id" element={<Detail/>}/>
+              <Route path="/edit/:id" element={<Edit/>}/>
+            </Routes>
+          </Container>
+        </BrowserRouter>
+      </ErrorBoundary>
     </ThemeProvider>
   )
 }

@@ -23,6 +23,15 @@ class GitHub {
       return feed2vm(feed, user)
     }))
   }
+
+  async fetchFeed(id: string) {
+    const res = await axios.get<Feed>(import.meta.env.VITE_GITHUB_PAGES_BASE + `/feeds/${id}.json`)
+    const feed = res.data
+    const user = await this.slack.fetchUserInfo(feed.author_id)
+    const vm = feed2vm(feed, user)
+    vm.messages = await sequential(feed.message_links!.map(async url => await this.slack.fetchMessageFromUrl(url)))
+    return vm
+  }
 }
 
 export default GitHub
