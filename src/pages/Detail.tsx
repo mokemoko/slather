@@ -5,7 +5,7 @@ import { userState } from '../services/state'
 import { useAsyncEffect } from '../utils/hook'
 import GitHub from '../services/github'
 import { FeedViewModel } from '../models/feed'
-import { Alert, AlertTitle, Paper, Snackbar, Stack } from '@mui/material'
+import { Paper, Stack } from '@mui/material'
 import { FeedItem } from '../components/FeedItem'
 import MessageItem from '../components/MessageItem'
 
@@ -34,12 +34,6 @@ const Detail = (): JSX.Element => {
             ))}
           </Stack>
         </Paper>
-        <Snackbar open>
-          <Alert severity="error">
-            <AlertTitle>title</AlertTitle>
-            message
-          </Alert>
-        </Snackbar>
       </>
     ) : <></>)
   )
