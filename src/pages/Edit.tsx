@@ -35,8 +35,8 @@ const Edit = ({}: Props): JSX.Element => {
       return
     }
     const client = new Slack(user)
-    const msg = await client.fetchMessageFromUrl(url)
-    setSrcMessages([msg])
+    const msg = await client.fetchMessagesFromUrl(url)
+    setSrcMessages(msg)
   }
 
   const handleSubmit = () => {

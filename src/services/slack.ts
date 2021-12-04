@@ -2,7 +2,8 @@ import { AuthTestResponse, ConversationsHistoryResponse, UsersProfileGetResponse
 import axios from 'axios'
 import { UserServiceInfo } from '../models/user'
 import { get, set } from '../utils/cache'
-import { message2vm, Message } from '../models/message'
+import { Message, message2vm } from '../models/message'
+import { sequential } from '../utils/promise'
 
 const baseUrl = 'https://slack.com/api/'
 
@@ -29,7 +30,7 @@ class Slack {
     }
   }
 
-  async post<T>(method: string, params: any) {
+  private async post<T>(method: string, params: any) {
     const data = new URLSearchParams({
       token: this.token,
       ...params,
@@ -74,37 +75,50 @@ class Slack {
     }
   }
 
-  async fetchMassage(channel: string, ts: string) {
-    const key = `${channel}.${ts}`
-    let message = get<Message>(key)
-    if (!message) {
-      const params = {
-        channel,
-        oldest: ts,
-        limit: 1,
-        inclusive: true,
-      }
-      const res = await this.post<ConversationsHistoryResponse>('conversations.history', params)
-      if (res.ok && res.messages) {
-        const [_message] = res.messages
-        if (_message.user) {
-          const userInfo = await this.fetchUserInfo(_message.user)
-          Object.assign(_message, userInfo)
-        }
-        message = _message
-        // TODO: 必要な項目のみ抽出
-        set(key, message)
-      } else {
-        throw res.error
-      }
+  private async fetchMassages(channel: string, ts: string, limit: number) {
+    const params = {
+      channel,
+      oldest: ts,
+      limit,
+      inclusive: true,
     }
-    return message2vm(this.team, channel, message)
+    const res = await this.post<ConversationsHistoryResponse>('conversations.history', params)
+    if (res.ok && res.messages) {
+      return sequential(res.messages.map(async message => {
+        if (message.user) {
+          const userInfo = await this.fetchUserInfo(message.user)
+          Object.assign(message, userInfo)
+        }
+        // TODO: 必要な項目のみ抽出
+        set(`${channel}.${ts}`, message)
+        return message2vm(this.team, channel, message)
+      }))
+    } else {
+      throw res.error
+    }
+  }
+
+  private parseUrl(url: string) {
+    const [channel, pts] = url.split('/').slice(-2)
+    const ts = `${pts.slice(1, -6)}.${pts.slice(-6)}`
+    return { channel, ts }
   }
 
   async fetchMessageFromUrl(url: string) {
-    const [channel, pts] = url.split('/').slice(-2)
-    const ts = `${pts.slice(1, -6)}.${pts.slice(-6)}`
-    return this.fetchMassage(channel, ts)
+    const { channel, ts } = this.parseUrl(url)
+    const cache = get<Message>(`${channel}.${ts}`)
+    if (cache) {
+      return message2vm(this.team, channel, cache)
+    } else {
+      const [message] = await this.fetchMassages(channel, ts, 1)
+      return message
+    }
+  }
+
+  async fetchMessagesFromUrl(url: string, limit: number = 100) {
+    const { channel, ts } = this.parseUrl(url)
+    const messages = await this.fetchMassages(channel, ts, limit)
+    return messages.reverse()
   }
 }
 

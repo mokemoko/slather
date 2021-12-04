@@ -23,6 +23,10 @@ class ErrorBoundary extends React.Component<Props, State> {
     setupInterceptor(error => this.setState({ error }))
   }
 
+  componentWillUnmount() {
+    setupInterceptor(() => {})
+  }
+
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     this.setState({ error })
   }
@@ -32,8 +36,8 @@ class ErrorBoundary extends React.Component<Props, State> {
       <>
         {this.props.children}
         {this.state.error && (
-          <Snackbar open>
-            <Alert severity="error">
+          <Snackbar open={!!this.state.error} onClose={() => this.setState({ error: undefined})}>
+            <Alert severity="error" onClose={() => this.setState({ error: undefined})}>
               <AlertTitle>{this.state.error.name}</AlertTitle>
               {this.state.error.message}
             </Alert>

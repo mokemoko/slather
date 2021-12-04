@@ -26,7 +26,7 @@ const Top = (): JSX.Element => {
     <Grid container spacing={4}>
       <Grid item xs={12} lg={9}>
         {user ? feeds.map((feed, idx) => (
-          <FeedItem key={idx} feed={feed}/>
+          <FeedItem key={idx} feed={feed} clickable/>
         )) : (
           <>
             <Alert severity="error" sx={{ mb: 2 }}>本サイトの利用には右上のアイコンからSlackにログインしてください</Alert>
