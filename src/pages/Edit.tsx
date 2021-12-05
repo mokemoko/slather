@@ -8,22 +8,29 @@ import Slack from '../services/slack'
 import { useRecoilState } from 'recoil'
 import { userState } from '../services/state'
 import { blue, red } from '@mui/material/colors'
-import { defaultFeedVM, FeedViewModel } from '../models/feed'
-import { useParams } from 'react-router-dom'
+import { defaultFeedVM, feed2vm, FeedViewModel, feedVM2feed } from '../models/feed'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useAsyncEffect } from '../utils/hook'
 import GitHub from '../services/github'
 
 const Edit = (): JSX.Element => {
+  const navigate = useNavigate()
   const { id } = useParams()
   const [srcMessages, setSrcMessages] = useState<MessageViewModel[]>([])
   const [feed, setFeed] = useState<FeedViewModel>(defaultFeedVM())
   const [user] = useRecoilState(userState)
 
   useAsyncEffect(async () => {
-    if (!user || !id || id === 'new') return
-
-    const github = new GitHub(user)
-    setFeed(await github.fetchFeed(id))
+    if (!user || !id) return
+    if (id === 'new') {
+      setFeed({
+        ...feed,
+        author_id: user.id,
+      })
+    } else {
+      const github = new GitHub(user)
+      setFeed(await github.fetchFeed(id))
+    }
   }, [user])
 
   const handleDragEnd = (result: DropResult, provided: ResponderProvided) => {
@@ -52,8 +59,10 @@ const Edit = (): JSX.Element => {
     setFeed({...feed})
   }
 
-  const handleSubmit = () => {
-    // TODO: add
+  const handleSubmit = async () => {
+    const github = new GitHub(user!)
+    await github.postFeed(feedVM2feed(feed))
+    navigate('/')
   }
 
   return (

@@ -10,6 +10,7 @@ interface Props {
 
 const FeedItem = ({ feed, clickable = false }: Props) => {
   const navigate = useNavigate()
+
   const handleClick = () => {
     navigate(`/detail/${feed.created_ms}`)
   }

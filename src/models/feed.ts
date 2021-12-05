@@ -27,8 +27,8 @@ export const defaultFeedVM = (): FeedViewModel => ({
   ...feed2vm(defaultFeed(), {
     username: '',
     icons: {
-      image_64: ''
-    }
+      image_64: '',
+    },
   }),
   messages: [],
 })
@@ -38,5 +38,15 @@ export const feed2vm = (feed: Feed, user: SlackUserInfo): FeedViewModel => {
     ...feed,
     author: user,
     created: (new Date(feed.created_ms)).toLocaleString(),
+  }
+}
+
+export const feedVM2feed = (vm: FeedViewModel): Feed => {
+  return {
+    title: vm.title,
+    description: vm.description,
+    author_id: vm.author_id,
+    created_ms: vm.created_ms,
+    message_links: vm.messages?.map(m => m.link),
   }
 }

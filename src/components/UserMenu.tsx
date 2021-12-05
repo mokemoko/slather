@@ -11,11 +11,11 @@ import {
   TextField,
   DialogContent,
 } from '@mui/material'
-import Logout from '@mui/icons-material/Logout'
+import { Logout as LogoutIcon, GitHub as GitHubIcon } from '@mui/icons-material'
 import { useRecoilState } from 'recoil'
 import { userState } from '../services/state'
-import { GitHub } from '@mui/icons-material'
 import Slack from '../services/slack'
+import GitHub from '../services/github'
 
 type InputType = 'Slack' | 'GitHub'
 
@@ -30,7 +30,12 @@ const UserMenu = () => {
       const user = await client.checkAuth()
       setUser(user)
     } else {
-      // TODO: add
+      const client = new GitHub(token)
+      const githubInfo = await client.checkAuth()
+      setUser({
+        ...user!,
+        githubInfo,
+      })
     }
     setCurrentInput(null)
   }
@@ -90,7 +95,7 @@ const UserMenu = () => {
           {user ? (
             <>
               <Avatar src={user.image} sx={{ width: 24, height: 24 }}/>
-              user.name
+              {user.name}
             </>
           ) : (
             <>Slackでログイン</>
@@ -101,12 +106,12 @@ const UserMenu = () => {
           onClick={() => setCurrentInput('GitHub')}
         >
           <ListItemIcon sx={{ justifyContent: 'center' }}>
-            <GitHub fontSize="small"/>
+            <GitHubIcon fontSize="small"/>
           </ListItemIcon>
           {user?.githubInfo ? (
             <>
               <Avatar src={user.githubInfo.image} sx={{ width: 24, height: 24 }}/>
-              user.githubInfo.name
+              {user.githubInfo.name}
             </>
           ) : (
             <>GitHubでログイン</>
@@ -119,7 +124,7 @@ const UserMenu = () => {
             onClick={() => setUser(null)}
           >
             <ListItemIcon sx={{ justifyContent: 'center' }}>
-              <Logout fontSize="small"/>
+              <LogoutIcon fontSize="small"/>
             </ListItemIcon>
             ログアウト
           </MenuItem>,
