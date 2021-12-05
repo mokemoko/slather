@@ -4,7 +4,7 @@ import type { User } from '../../models/user'
 import Slack from '../slack'
 import { sequential } from '../../utils/promise'
 import { feed2vm } from '../../models/feed'
-import { feedTemplate, apiPath4commit, apiPath4content } from './util'
+import { feedTemplate, apiPath4content } from './util'
 import { UserServiceInfo } from '../../models/user'
 
 interface GitHubUserInfo {
