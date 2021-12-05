@@ -10,7 +10,7 @@ class GitHub {
   slack: Slack
 
   constructor(user: User) {
-    this.slack = new Slack(user.token)
+    this.slack = new Slack(user)
     if (user.githubInfo) {
       this.token = user.githubInfo.token
     }

@@ -18,7 +18,7 @@ const ts2localeString = (ts: string) => {
 const message2url = (team: string, channel: string, message: Message) => {
   // TODO: consider thread
   const pts = `p${message.ts?.replace(/\./, '')}`
-  return `https://${team}.slack.com/archive/${channel}/${pts}`
+  return `https://${team}.slack.com/archives/${channel}/${pts}`
 }
 
 export const message2vm = (team: string, channel: string, message: Message): MessageViewModel => {

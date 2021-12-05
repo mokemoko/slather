@@ -15,6 +15,24 @@ export interface FeedViewModel extends Feed {
   messages?: MessageViewModel[]
 }
 
+export const defaultFeed = (): Feed => ({
+  title: '',
+  description: '',
+  author_id: '',
+  created_ms: (new Date()).getTime(),
+  message_links: [],
+})
+
+export const defaultFeedVM = (): FeedViewModel => ({
+  ...feed2vm(defaultFeed(), {
+    username: '',
+    icons: {
+      image_64: ''
+    }
+  }),
+  messages: [],
+})
+
 export const feed2vm = (feed: Feed, user: SlackUserInfo): FeedViewModel => {
   return {
     ...feed,

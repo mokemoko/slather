@@ -1,33 +1,41 @@
-import React, { useEffect, useState } from 'react'
-import { Box, Button, Grid, Paper, Stack, TextField, Typography } from '@mui/material'
+import React, { useState } from 'react'
+import { Box, Button, Grid, InputAdornment, Paper, Stack, TextField, Typography } from '@mui/material'
 import MessageItem from '../components/MessageItem'
 import { DragDropContext, Draggable, Droppable, DropResult, ResponderProvided } from 'react-beautiful-dnd'
-import { Save as SaveIcon } from '@mui/icons-material'
+import { Save as SaveIcon, Colorize as ColorizeIcon } from '@mui/icons-material'
 import type { MessageViewModel } from '../models/message'
 import Slack from '../services/slack'
 import { useRecoilState } from 'recoil'
 import { userState } from '../services/state'
 import { blue, red } from '@mui/material/colors'
+import { defaultFeedVM, FeedViewModel } from '../models/feed'
+import { useParams } from 'react-router-dom'
+import { useAsyncEffect } from '../utils/hook'
+import GitHub from '../services/github'
 
-interface Props {
-
-}
-
-const Edit = ({}: Props): JSX.Element => {
+const Edit = (): JSX.Element => {
+  const { id } = useParams()
   const [srcMessages, setSrcMessages] = useState<MessageViewModel[]>([])
-  const [dstMessages, setDstMessages] = useState<MessageViewModel[]>([])
+  const [feed, setFeed] = useState<FeedViewModel>(defaultFeedVM())
   const [user] = useRecoilState(userState)
+
+  useAsyncEffect(async () => {
+    if (!user || !id || id === 'new') return
+
+    const github = new GitHub(user)
+    setFeed(await github.fetchFeed(id))
+  }, [user])
 
   const handleDragEnd = (result: DropResult, provided: ResponderProvided) => {
     if (!result.destination) {
       return
     }
-    const src = result.source.droppableId === 'source' ? srcMessages : dstMessages
-    const dst = result.destination.droppableId === 'source' ? srcMessages : dstMessages
+    const src = result.source.droppableId === 'source' ? srcMessages : feed.messages!
+    const dst = result.destination.droppableId === 'source' ? srcMessages : feed.messages!
     const [srcItem] = src.splice(result.source.index, 1)
     dst.splice(result.destination.index, 0, srcItem)
     setSrcMessages(srcMessages)
-    setDstMessages(dstMessages)
+    setFeed({...feed})
   }
 
   const handleInputLink = async (url: string) => {
@@ -37,6 +45,11 @@ const Edit = ({}: Props): JSX.Element => {
     const client = new Slack(user)
     const msg = await client.fetchMessagesFromUrl(url)
     setSrcMessages(msg)
+  }
+
+  const handleChange = (key: 'title' | 'description', value: string) => {
+    feed[key] = value
+    setFeed({...feed})
   }
 
   const handleSubmit = () => {
@@ -52,6 +65,13 @@ const Edit = ({}: Props): JSX.Element => {
               fullWidth
               variant="standard"
               placeholder="抽出対象とするメッセージリンクを入力"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <ColorizeIcon/>
+                  </InputAdornment>
+                ),
+              }}
               onKeyDown={(e) => e.key === 'Enter' && handleInputLink((e.target as any).value)}
             />
           </Paper>
@@ -110,7 +130,7 @@ const Edit = ({}: Props): JSX.Element => {
                   bgcolor: snapshot.isDraggingOver ? red[50] : '',
                 }}
               >
-                {dstMessages.map((message, idx) => (
+                {feed.messages!.map((message, idx) => (
                   <Draggable key={idx} draggableId={`dest${idx}`} index={idx}>
                     {((provided, snapshot) => (
                       <Box
@@ -125,7 +145,7 @@ const Edit = ({}: Props): JSX.Element => {
                     ))}
                   </Draggable>
                 ))}
-                {dstMessages.length > 0 ? provided.placeholder : (
+                {feed.messages!.length > 0 ? provided.placeholder : (
                   <Box
                     sx={{
                       display: 'flex',
@@ -151,12 +171,16 @@ const Edit = ({}: Props): JSX.Element => {
               <TextField
                 fullWidth
                 placeholder="まとめのタイトル"
+                value={feed.title}
+                onChange={e => handleChange('title', e.target.value)}
               />
               <TextField
                 fullWidth
                 multiline
                 rows={4}
                 placeholder="まとめの説明文（省略可）"
+                value={feed.description}
+                onChange={e => handleChange('description', e.target.value)}
               />
               <Button
                 variant="contained"

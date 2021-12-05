@@ -1,6 +1,6 @@
 import React from 'react'
 import type { MessageViewModel } from '../models/message'
-import { Avatar, Box, Chip, Stack, Typography } from '@mui/material'
+import { Avatar, Box, Chip, Link, Stack, Typography } from '@mui/material'
 
 interface Props {
   message: MessageViewModel
@@ -24,9 +24,16 @@ const MessageItem = ({ message }: Props): JSX.Element => {
                 sx={{ height: 18, borderRadius: 0.5, fontSize: 11 }}
               />
             )}
-            <Typography variant="body2">{message.date}</Typography>
+            <Link
+              variant="inherit"
+              target="_blank"
+              rel="noreferrer"
+              href={message.link}
+            >
+              <Typography variant="body2">{message.date}</Typography>
+            </Link>
           </Stack>
-          <Typography variant="body1" whiteSpace="pre-wrap">{message.text}</Typography>
+          <Typography variant="body1" whiteSpace="break-spaces" sx={{wordBreak: 'break-all'}}>{message.text}</Typography>
         </Stack>
       </Stack>
     </Box>
