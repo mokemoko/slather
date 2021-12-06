@@ -14,7 +14,7 @@ const Top = (): JSX.Element => {
   const [ownFlg, setOwnFlg] = useState(false)
   const filteredFeeds = useMemo(() => {
     return feeds
-      .filter(feed => feed.author_id === user?.id)
+      .filter(feed => !ownFlg || feed.author_id === user?.id)
       .filter(feed => feed.title.match(searchText) || feed.description.match(searchText))
   }, [feeds, ownFlg, searchText])
 

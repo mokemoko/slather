@@ -71,10 +71,21 @@ class GitHub {
     return vm
   }
 
+  private async fetchFeedSha(feed: Feed) {
+    try{
+      const res = await this.apiClient.get<{sha: string}>(apiPath4content(feed))
+      return res.data.sha
+    } catch(e) {
+      return null
+    }
+  }
+
   async postFeed(feed: Feed) {
+    const sha = await this.fetchFeedSha(feed)
     await this.apiClient.put<Feed>(apiPath4content(feed), {
-      message: 'add feed',
+      message: sha ? 'update feed' : 'add feed',
       content: btoa(unescape(encodeURIComponent(feedTemplate(feed)))),
+      sha,
     })
   }
 }

@@ -1,5 +1,5 @@
 import { AppBar, Button, Snackbar, Toolbar, Tooltip, Typography, Alert } from '@mui/material'
-import { Edit, List } from '@mui/icons-material'
+import { List, Add } from '@mui/icons-material'
 import React, { useState } from 'react'
 import { useRecoilState } from 'recoil'
 import { userState } from '../services/state'
@@ -36,7 +36,7 @@ const Navigation = (): JSX.Element => {
           </Button>
           <Button
             color="inherit"
-            startIcon={<Edit/>}
+            startIcon={<Add/>}
             onClick={handleClickCreate}
           >
             まとめを作成する
