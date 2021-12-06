@@ -24,7 +24,6 @@ const delayStore = ((ms: number) => {
       timer = 0
     }
     timer = window.setTimeout(() => {
-      console.log("store")
       const data = JSON.stringify(cache.dump())
       localStorage.setItem(STORE_KEY, data)
     }, ms)
