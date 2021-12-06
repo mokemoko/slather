@@ -1,4 +1,4 @@
-import { Feed, feedVM2feed } from '../../models/feed'
+import type { Feed } from '../../models/feed'
 
 export const apiPath4content = (feed: Feed) => [
   'repos',
@@ -10,8 +10,8 @@ export const apiPath4content = (feed: Feed) => [
 
 export const feedTemplate = (feed: Feed) => {
   return `---
-title: ${feed.title}
-description: ${feed.description}
+title: ${JSON.stringify(feed.title)}
+description: ${JSON.stringify(feed.description)}
 author: ${feed.author_id}
 created: ${feed.created_ms}
 ---

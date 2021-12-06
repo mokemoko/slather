@@ -1,9 +1,5 @@
-import React, { useState } from 'react'
-import {
-  Alert,
-  Grid,
-  Paper,
-} from '@mui/material'
+import React, { useMemo, useState } from 'react'
+import { Alert, FormControlLabel, FormGroup, Grid, Paper, Switch, TextField, } from '@mui/material'
 import { useRecoilState } from 'recoil'
 import { userState } from '../services/state'
 import GitHub from '../services/github'
@@ -14,6 +10,13 @@ import { useAsyncEffect } from '../utils/hook'
 const Top = (): JSX.Element => {
   const [user] = useRecoilState(userState)
   const [feeds, setFeeds] = useState<FeedViewModel[]>([])
+  const [searchText, setSearchText] = useState('')
+  const [ownFlg, setOwnFlg] = useState(false)
+  const filteredFeeds = useMemo(() => {
+    return feeds
+      .filter(feed => feed.author_id === user?.id)
+      .filter(feed => feed.title.match(searchText) || feed.description.match(searchText))
+  }, [feeds, ownFlg, searchText])
 
   useAsyncEffect(async () => {
     if (!user) return
@@ -25,7 +28,7 @@ const Top = (): JSX.Element => {
   return (
     <Grid container spacing={4}>
       <Grid item xs={12} lg={9}>
-        {user ? feeds.map((feed, idx) => (
+        {user ? filteredFeeds.map((feed, idx) => (
           <FeedItem key={idx} feed={feed} clickable/>
         )) : (
           <>
@@ -35,7 +38,21 @@ const Top = (): JSX.Element => {
         )}
       </Grid>
       <Grid item xs={12} lg={3}>
-        <Paper>検索</Paper>
+        <Paper sx={{ p: 2 }}>
+          <FormGroup>
+            <TextField
+              variant="standard"
+              fullWidth
+              placeholder="検索"
+              sx={{ mb: 2 }}
+              onChange={e => setSearchText(e.target.value)}
+            />
+            <FormControlLabel
+              label="自分が投稿したもの"
+              control={<Switch onChange={e => setOwnFlg(e.target.checked)}/>}
+            />
+          </FormGroup>
+        </Paper>
       </Grid>
     </Grid>
   )

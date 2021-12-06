@@ -8,7 +8,7 @@ import Slack from '../services/slack'
 import { useRecoilState } from 'recoil'
 import { userState } from '../services/state'
 import { blue, red } from '@mui/material/colors'
-import { defaultFeedVM, feed2vm, FeedViewModel, feedVM2feed } from '../models/feed'
+import { defaultFeedVM, FeedViewModel, feedVM2feed } from '../models/feed'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAsyncEffect } from '../utils/hook'
 import GitHub from '../services/github'
@@ -42,7 +42,7 @@ const Edit = (): JSX.Element => {
     const [srcItem] = src.splice(result.source.index, 1)
     dst.splice(result.destination.index, 0, srcItem)
     setSrcMessages(srcMessages)
-    setFeed({...feed})
+    setFeed({ ...feed })
   }
 
   const handleInputLink = async (url: string) => {
@@ -56,7 +56,7 @@ const Edit = (): JSX.Element => {
 
   const handleChange = (key: 'title' | 'description', value: string) => {
     feed[key] = value
-    setFeed({...feed})
+    setFeed({ ...feed })
   }
 
   const handleSubmit = async () => {
