@@ -9,7 +9,7 @@ import {
   Dialog,
   DialogTitle,
   TextField,
-  DialogContent,
+  DialogContent, Link,
 } from '@mui/material'
 import { Logout as LogoutIcon, GitHub as GitHubIcon } from '@mui/icons-material'
 import { useRecoilState } from 'recoil'
@@ -133,6 +133,14 @@ const UserMenu = () => {
       <Dialog open={!!currentInput} onClose={() => setCurrentInput(null)}>
         <DialogTitle>{currentInput}のTokenを入力してください</DialogTitle>
         <DialogContent>
+          <Link
+            target="_blank"
+            rel="noreferrer"
+            href={currentInput === 'Slack' ? import.meta.env.VITE_SLACK_TOKEN_LINK : import.meta.env.VITE_GITHUB_TOKEN_LINK}
+          >
+            ここ
+          </Link>
+          から発行できます
           <TextField
             variant="outlined"
             fullWidth

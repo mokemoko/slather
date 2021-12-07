@@ -84,4 +84,6 @@ interface ImportMetaEnv {
   readonly VITE_GITHUB_ORGANIZATION: string
   readonly VITE_GITHUB_REPOSITORY: string
   readonly VITE_GITHUB_PAGES_BASE: string
+  readonly VITE_GITHUB_TOKEN_LINK: string
+  readonly VITE_SLACK_TOKEN_LINK: string
 }

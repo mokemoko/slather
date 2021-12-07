@@ -15,14 +15,24 @@ const Detail = (): JSX.Element => {
   const { id } = useParams()
   const [user] = useRecoilState(userState)
   const [feed, setFeed] = useState<FeedViewModel | null>(null)
-  const isOwn = useMemo(() => feed?.author_id === user?.id, [user, feed])
+  const [github, setGithub] = useState<GitHub | null>(null)
+  const canEdit = useMemo(() => {
+    return user?.githubInfo && feed?.author_id === user?.id
+  }, [user, feed])
 
   useAsyncEffect(async () => {
     if (!user || !id) return
 
-    const github = new GitHub(user)
-    setFeed(await github.fetchFeed(id))
+    const client = new GitHub(user)
+    setGithub(client)
+    setFeed(await client.fetchFeed(id))
   }, [user])
+
+  const handleDelete = async () => {
+    if (!github || !feed) return
+    await github.deleteFeed(feed)
+    navigate('/')
+  }
 
   return (
     (feed ? (
@@ -41,7 +51,7 @@ const Detail = (): JSX.Element => {
             size="large"
             sx={{ width: 120 }}
             startIcon={<EditIcon/>}
-            disabled={!isOwn}
+            disabled={!canEdit}
             onClick={() => navigate(`/edit/${feed?.created_ms}`)}
           >
             編集
@@ -52,7 +62,8 @@ const Detail = (): JSX.Element => {
             color="error"
             sx={{ width: 120 }}
             startIcon={<DeleteIcon/>}
-            disabled={!isOwn}
+            disabled={!canEdit}
+            onClick={handleDelete}
           >
             削除
           </Button>

@@ -12,7 +12,7 @@ const Navigation = (): JSX.Element => {
   const navigate = useNavigate()
 
   const handleClickCreate = () => {
-    if (user) {
+    if (user?.githubInfo) {
       navigate('/edit/new')
     } else {
       setIsOpenAlert(true)
