@@ -52,7 +52,7 @@ class GitHub {
 
   async fetchFeeds() {
     const res = await this.pageClient.get<Feed[]>('/data/all.json', {
-      params: { ts: (new Date()).getTime() }
+      params: { ts: (new Date()).getTime() },
     })
     return await sequential(res.data.map(async feed => {
       const user = await this.slack!.fetchUserInfo(feed.author_id)
@@ -62,7 +62,7 @@ class GitHub {
 
   async fetchFeed(id: string) {
     const res = await this.pageClient.get<Feed>(`/feeds/${id}.json`, {
-      params: { ts: (new Date()).getTime() }
+      params: { ts: (new Date()).getTime() },
     })
     const feed = res.data
     const user = await this.slack!.fetchUserInfo(feed.author_id)
@@ -72,10 +72,10 @@ class GitHub {
   }
 
   private async fetchFeedSha(feed: Feed) {
-    try{
-      const res = await this.apiClient.get<{sha: string}>(apiPath4content(feed))
+    try {
+      const res = await this.apiClient.get<{ sha: string }>(apiPath4content(feed))
       return res.data.sha
-    } catch(e) {
+    } catch (e) {
       return null
     }
   }
@@ -86,6 +86,16 @@ class GitHub {
       message: sha ? 'update feed' : 'add feed',
       content: btoa(unescape(encodeURIComponent(feedTemplate(feed)))),
       sha,
+    })
+  }
+
+  async deleteFeed(feed: Feed) {
+    const sha = await this.fetchFeedSha(feed)
+    await this.apiClient.delete<Feed>(apiPath4content(feed), {
+      data: {
+        message: 'remove feed',
+        sha,
+      },
     })
   }
 }
