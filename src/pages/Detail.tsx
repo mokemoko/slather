@@ -4,7 +4,7 @@ import { useRecoilState } from 'recoil'
 import { userState } from '../services/state'
 import { useAsyncEffect } from '../utils/hook'
 import GitHub from '../services/github'
-import { FeedViewModel } from '../models/feed'
+import { FeedViewModel, feedVM2text } from '../models/feed'
 import { Button, Paper, Stack } from '@mui/material'
 import { ContentPaste as ContentPasteIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material'
 import { FeedItem } from '../components/FeedItem'
@@ -34,6 +34,11 @@ const Detail = (): JSX.Element => {
     navigate('/')
   }
 
+  const handleCopy = async () => {
+    if (!feed) return
+    await navigator.clipboard.writeText(feedVM2text(feed))
+  }
+
   return (
     (feed ? (
       <>
@@ -43,6 +48,7 @@ const Detail = (): JSX.Element => {
             size="large"
             sx={{ width: 120 }}
             startIcon={<ContentPasteIcon/>}
+            onClick={handleCopy}
           >
             コピー
           </Button>

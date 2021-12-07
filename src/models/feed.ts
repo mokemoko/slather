@@ -50,3 +50,16 @@ export const feedVM2feed = (vm: FeedViewModel): Feed => {
     message_links: vm.messages?.map(m => m.link),
   }
 }
+
+export const feedVM2text = (vm: FeedViewModel): string => {
+  return [
+    `# ${vm.title}`,
+    vm.description,
+    `created by ${vm.author.username} at ${vm.created}`,
+    '---',
+    (vm.messages || []).map(message => [
+      `${message.username} ${message.date}`,
+      message.text,
+    ].join('\n')).join('\n\n'),
+  ].join('\n')
+}
