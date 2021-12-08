@@ -1,7 +1,13 @@
-import React, { PropsWithChildren } from 'react'
+import React, { PropsWithChildren, useEffect, useState } from 'react'
 import { Node, textParser } from '../models/text'
 import { Typography, Link } from '@mui/material'
 import { unescape } from '../utils/string'
+import { sequential } from '../utils/promise'
+import { useAsyncEffect } from '../utils/hook'
+import { useRecoilState } from 'recoil'
+import { User } from '../models/user'
+import Slack from '../services/slack'
+import { userState } from '../services/state'
 
 interface Props {
   text: string
@@ -73,6 +79,19 @@ const Mention = ({ text }: Props) => (
     @{text}
   </span>
 )
+const UserMention = ({ text }: Props) => {
+  const [username, setUsername] = useState(text)
+  const [user] = useRecoilState(userState)
+
+  useAsyncEffect(async () => {
+    if (!user) return
+    const client = new Slack(user)
+    const info = await client.fetchUserInfo(text)
+    setUsername(info.username)
+  }, [user, text])
+
+  return <Mention text={username}/>
+}
 const TextLink = ({ link, label }: {link: string, label: string}) => {
   return (
     <Link
@@ -104,6 +123,8 @@ const TextComponent = ({ node }: { node: Node }) => {
       return <Quote text={text}/>
     case 'mention':
       return <Mention text={text}/>
+    case 'userMention':
+      return <UserMention text={text}/>
     case 'link':
       const [link, label] = text.split('|')
       return <TextLink link={link} label={label}/>
@@ -115,12 +136,15 @@ const TextComponent = ({ node }: { node: Node }) => {
 const parser = textParser()
 
 const TextComponents = ({ message }: { message: string }) => {
-  const res = parser.parse(message)
-  if (!res.status) return <>message</>
+  const [nodes, setNodes] = useState<Node[]>([])
+  useEffect(() => {
+    const res = parser.parse(message)
+    setNodes(res.status ? res.value : [message])
+  }, [message])
 
   return (
     <>
-      {res.value.map((node, idx) => <TextComponent key={idx} node={node}/>)}
+      {nodes.map((node, idx) => <TextComponent key={idx} node={node}/>)}
     </>
   )
 }

@@ -109,7 +109,8 @@ class Slack {
     }
     const res = await this.post<ConversationsHistoryResponse>('conversations.history', params)
     if (res.ok && res.messages) {
-      return sequential(res.messages.map(async message => {
+      console.log(res.messages)
+      return sequential(res.messages.map(message => async () => {
         if (message.user && message.user !== 'USLACKBOT') {
           const userInfo = await this.fetchUserInfo(message.user)
           Object.assign(message, userInfo)

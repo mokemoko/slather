@@ -54,7 +54,7 @@ class GitHub {
     const res = await this.pageClient.get<Feed[]>('/data/all.json', {
       params: { ts: (new Date()).getTime() },
     })
-    return await sequential(res.data.map(async feed => {
+    return await sequential(res.data.map(feed => async () => {
       const user = await this.slack!.fetchUserInfo(feed.author_id)
       return feed2vm(feed, user)
     }))
@@ -67,7 +67,7 @@ class GitHub {
     const feed = res.data
     const user = await this.slack!.fetchUserInfo(feed.author_id)
     const vm = feed2vm(feed, user)
-    vm.messages = await sequential(feed.message_links!.map(async url => await this.slack!.fetchMessageFromUrl(url)))
+    vm.messages = await sequential(feed.message_links!.map(url => async () => await this.slack!.fetchMessageFromUrl(url)))
     return vm
   }
 

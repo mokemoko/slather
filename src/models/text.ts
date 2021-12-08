@@ -2,7 +2,7 @@ import {
   Parser, regex, alt, string, newline, whitespace, Node as PNode, letters, oneOf,
 } from 'parsimmon'
 
-export type NodeNames = 'mention' | 'quote' | 'link' | 'bold' | 'code' | 'codeBlock' | 'italic' | 'strikethrough'
+export type NodeNames = 'mention' | 'userMention' | 'quote' | 'link' | 'bold' | 'code' | 'codeBlock' | 'italic' | 'strikethrough'
 export type Node = string | PNode<NodeNames, string>
 
 export const textParser = (): Parser<Node[]> => {
@@ -35,7 +35,7 @@ const mention = () => {
 const userMention = () => {
   return regex(/[0-9A-Z]+/)
     .wrap(string('<@'), string('>'))
-    .node('mention')
+    .node('userMention')
 }
 
 const teamMention = () => {

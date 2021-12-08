@@ -9,10 +9,6 @@ interface Props {
 }
 
 const MessageItem = ({ message }: Props): JSX.Element => {
-  const textComponent = useMemo(() => {
-    return <TextComponents message={message.text || ''}/>
-  }, [message])
-
   return (
     <Box>
       <Stack direction="row">
@@ -40,7 +36,7 @@ const MessageItem = ({ message }: Props): JSX.Element => {
             </Link>
           </Stack>
           <Box whiteSpace="break-spaces" sx={{ wordBreak: 'break-all' }}>
-            {textComponent}
+            <TextComponents message={message.text || ''} />
             {message.attachments?.map((attach, idx) => (
               <span key={idx}>
                 <TextComponents message={attach.pretext || ''}/>
