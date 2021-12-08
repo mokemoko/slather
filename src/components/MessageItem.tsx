@@ -1,22 +1,37 @@
-import React from 'react'
+import React, { useEffect, useMemo } from 'react'
 import type { MessageViewModel } from '../models/message'
 import { Avatar, Box, Chip, Link, Stack, Typography } from '@mui/material'
+import { textParser } from '../models/text'
+import TextComponent from './TextComponent'
 
 interface Props {
   message: MessageViewModel
 }
 
+const parser = textParser()
+
 const MessageItem = ({ message }: Props): JSX.Element => {
+  const textComponent = useMemo(() => {
+    if (!message.text) return <></>
+
+    const res = parser.parse(message.text)
+    if (!res.status) return <>message.text</>
+
+    return res.value.map(node => <TextComponent node={node}/>)
+  }, [message])
+
+  console.log(parser.parse(message.text!))
+
   return (
     <Box>
       <Stack direction="row">
         <Avatar
-          sx={{ m: 1 }}
+          sx={{ borderRadius: 1, m: 1 }}
           src={message.avatarUrl}
         />
         <Stack direction="column" sx={{ flexGrow: 1 }}>
           <Stack direction="row" alignItems="center" spacing={1}>
-            <Typography variant="subtitle2">{message.username}</Typography>
+            <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>{message.username}</Typography>
             {message.bot_id && (
               <Chip
                 size="small"
@@ -33,7 +48,9 @@ const MessageItem = ({ message }: Props): JSX.Element => {
               <Typography variant="body2">{message.date}</Typography>
             </Link>
           </Stack>
-          <Typography variant="body1" whiteSpace="break-spaces" sx={{wordBreak: 'break-all'}}>{message.text}</Typography>
+          <Typography variant="body1" whiteSpace="break-spaces" sx={{ wordBreak: 'break-all' }}>
+            {textComponent}
+          </Typography>
         </Stack>
       </Stack>
     </Box>

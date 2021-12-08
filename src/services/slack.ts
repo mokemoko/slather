@@ -115,7 +115,7 @@ class Slack {
     }
   }
 
-  async fetchMessagesFromUrl(url: string, limit: number = 100) {
+  async fetchMessagesFromUrl(url: string, limit: number = 20) {
     const { channel, ts } = this.parseUrl(url)
     const messages = await this.fetchMassages(channel, ts, limit)
     return messages.reverse()
