@@ -1,18 +1,25 @@
-import React from 'react'
-import { Node as PNode } from 'parsimmon'
-import { Node, NodeNames } from '../models/text'
+import React, { PropsWithChildren } from 'react'
+import { Node, textParser } from '../models/text'
 import { Typography, Link } from '@mui/material'
+import { unescape } from '../utils/string'
 
-const Bold = ({ node }: { node: PNode<NodeNames, string> }) => (
-  <span style={{ fontWeight: 'bold' }}>{node.value}</span>
+interface Props {
+  text: string
+}
+interface ColorProps {
+  color: string
+}
+
+const Bold = ({ text }: Props) => (
+  <span style={{ fontWeight: 'bold' }}>{text}</span>
 )
-const Italic = ({ node }: { node: PNode<NodeNames, string> }) => (
-  <span style={{ fontStyle: 'italic' }}>{node.value}</span>
+const Italic = ({ text }: Props) => (
+  <span style={{ fontStyle: 'italic' }}>{text}</span>
 )
-const Strikethrough = ({ node }: { node: PNode<NodeNames, string> }) => (
-  <span style={{ textDecoration: 'line-through' }}>{node.value}</span>
+const Strikethrough = ({ text }: Props) => (
+  <span style={{ textDecoration: 'line-through' }}>{text}</span>
 )
-const Quote = ({ node }: { node: PNode<NodeNames, string> }) => (
+export const QuoteBase = ({ color, children }: PropsWithChildren<ColorProps>) => (
   <Typography sx={{
     position: 'relative',
     paddingLeft: 2,
@@ -24,13 +31,16 @@ const Quote = ({ node }: { node: PNode<NodeNames, string> }) => (
       display: 'block',
       content: '""',
       width: 4,
-      backgroundColor: '#ddd',
+      backgroundColor: color,
     },
   }}>
-    {node.value}
+    {children}
   </Typography>
 )
-const Code = ({ node }: { node: PNode<NodeNames, string> }) => (
+const Quote = ({ text }: Props) => (
+  <QuoteBase color="#ddd">{text}</QuoteBase>
+)
+const Code = ({ text }: Props) => (
   <span style={{
     color: '#e01e5a',
     backgroundColor: '#1d1c1d0a',
@@ -38,30 +48,32 @@ const Code = ({ node }: { node: PNode<NodeNames, string> }) => (
     borderRadius: '2px',
     padding: '2px',
   }}>
-    {node.value}
+    {text}
   </span>
 )
-const CodeBlock = ({ node }: { node: PNode<NodeNames, string> }) => (
+export const BlockBase = ({ color, children }: PropsWithChildren<ColorProps>) => (
   <div style={{
-    backgroundColor: '#1d1c1d0a',
+    backgroundColor: `${color}`,
     border: '1px solid #1d1c1d21',
     borderRadius: '4px',
     padding: '8px',
     margin: '4px auto',
   }}>
-    {node.value}
+    {children}
   </div>
 )
-const Mention = ({ node }: { node: PNode<NodeNames, string> }) => (
+const CodeBlock = ({ text }: Props) => (
+  <BlockBase color="#1d1c1d0a">{text}</BlockBase>
+)
+const Mention = ({ text }: Props) => (
   <span style={{
     color: '#1264a3',
     backgroundColor: '#1d9bd11A',
   }}>
-    @{node.value}
+    @{text}
   </span>
 )
-const TextLink = ({ node }: { node: PNode<NodeNames, string> }) => {
-  const [link, label] = node.value.split('|')
+const TextLink = ({ link, label }: {link: string, label: string}) => {
   return (
     <Link
       target="_blank"
@@ -74,27 +86,43 @@ const TextLink = ({ node }: { node: PNode<NodeNames, string> }) => {
 }
 
 const TextComponent = ({ node }: { node: Node }) => {
-  if (typeof node === 'string') return <>{node}</>
+  if (typeof node === 'string') return <>{unescape(node)}</>
+
+  const text = unescape(node.value)
   switch (node.name) {
     case 'bold':
-      return <Bold node={node}/>
+      return <Bold text={text}/>
     case 'italic':
-      return <Italic node={node}/>
+      return <Italic text={text}/>
     case 'strikethrough':
-      return <Strikethrough node={node}/>
+      return <Strikethrough text={text}/>
     case 'code':
-      return <Code node={node}/>
+      return <Code text={text}/>
     case 'codeBlock':
-      return <CodeBlock node={node}/>
+      return <CodeBlock text={text}/>
     case 'quote':
-      return <Quote node={node}/>
+      return <Quote text={text}/>
     case 'mention':
-      return <Mention node={node}/>
+      return <Mention text={text}/>
     case 'link':
-      return <TextLink node={node}/>
+      const [link, label] = text.split('|')
+      return <TextLink link={link} label={label}/>
     default:
       return <>{node.value}</>
   }
 }
 
-export default TextComponent
+const parser = textParser()
+
+const TextComponents = ({ message }: { message: string }) => {
+  const res = parser.parse(message)
+  if (!res.status) return <>message</>
+
+  return (
+    <>
+      {res.value.map((node, idx) => <TextComponent key={idx} node={node}/>)}
+    </>
+  )
+}
+
+export default TextComponents

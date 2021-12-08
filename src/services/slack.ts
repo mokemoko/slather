@@ -1,4 +1,9 @@
-import { AuthTestResponse, ConversationsHistoryResponse, UsersProfileGetResponse } from '@slack/web-api'
+import {
+  AuthTestResponse,
+  BotsInfoResponse,
+  ConversationsHistoryResponse,
+  UsersProfileGetResponse,
+} from '@slack/web-api'
 import axios from 'axios'
 import { UserServiceInfo } from '../models/user'
 import { get, set } from '../utils/cache'
@@ -59,6 +64,26 @@ class Slack {
     }
   }
 
+  async fetchBotInfo(bot: string): Promise<SlackUserInfo> {
+    const cache = get<SlackUserInfo>(bot)
+    if (cache) {
+      return cache
+    }
+    const res = await this.post<BotsInfoResponse>('bots.info', { bot })
+    if (res.ok) {
+      const info = {
+        username: res.bot?.name || '',
+        icons: {
+          image_64: res.bot?.icons?.image_48 || '',
+        },
+      }
+      set(bot, info)
+      return info
+    } else {
+      throw res.error
+    }
+  }
+
   async checkAuth(): Promise<UserServiceInfo> {
     const res = await this.post<AuthTestResponse>('auth.test', {})
     if (res.ok) {
@@ -85,9 +110,12 @@ class Slack {
     const res = await this.post<ConversationsHistoryResponse>('conversations.history', params)
     if (res.ok && res.messages) {
       return sequential(res.messages.map(async message => {
-        if (message.user) {
+        if (message.user && message.user !== 'USLACKBOT') {
           const userInfo = await this.fetchUserInfo(message.user)
           Object.assign(message, userInfo)
+        } else if (message.bot_id) {
+          const botInfo = await this.fetchBotInfo(message.bot_id)
+          Object.assign(message, botInfo)
         }
         // TODO: 必要な項目のみ抽出
         set(`${channel}.${ts}`, message)

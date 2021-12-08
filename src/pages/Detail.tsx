@@ -9,6 +9,7 @@ import { Button, Paper, Stack } from '@mui/material'
 import { ContentPaste as ContentPasteIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material'
 import { FeedItem } from '../components/FeedItem'
 import MessageItem from '../components/MessageItem'
+import { unescape } from '../utils/string'
 
 const Detail = (): JSX.Element => {
   const navigate = useNavigate()
@@ -36,7 +37,7 @@ const Detail = (): JSX.Element => {
 
   const handleCopy = async () => {
     if (!feed) return
-    await navigator.clipboard.writeText(feedVM2text(feed))
+    await navigator.clipboard.writeText(unescape(feedVM2text(feed)))
   }
 
   return (

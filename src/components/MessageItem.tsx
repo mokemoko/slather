@@ -1,26 +1,17 @@
-import React, { useEffect, useMemo } from 'react'
+import React, { useMemo } from 'react'
 import type { MessageViewModel } from '../models/message'
 import { Avatar, Box, Chip, Link, Stack, Typography } from '@mui/material'
-import { textParser } from '../models/text'
-import TextComponent from './TextComponent'
+import { BlockBase, QuoteBase } from './TextComponent'
+import TextComponents from './TextComponent'
 
 interface Props {
   message: MessageViewModel
 }
 
-const parser = textParser()
-
 const MessageItem = ({ message }: Props): JSX.Element => {
   const textComponent = useMemo(() => {
-    if (!message.text) return <></>
-
-    const res = parser.parse(message.text)
-    if (!res.status) return <>message.text</>
-
-    return res.value.map(node => <TextComponent node={node}/>)
+    return <TextComponents message={message.text || ''}/>
   }, [message])
-
-  console.log(parser.parse(message.text!))
 
   return (
     <Box>
@@ -48,9 +39,26 @@ const MessageItem = ({ message }: Props): JSX.Element => {
               <Typography variant="body2">{message.date}</Typography>
             </Link>
           </Stack>
-          <Typography variant="body1" whiteSpace="break-spaces" sx={{ wordBreak: 'break-all' }}>
+          <Box whiteSpace="break-spaces" sx={{ wordBreak: 'break-all' }}>
             {textComponent}
-          </Typography>
+            {message.attachments?.map((attach, idx) => (
+              <span key={idx}>
+                <TextComponents message={attach.pretext || ''}/>
+                <QuoteBase color={`#${attach.color || 'ddd'}`}>
+                  <span style={{ fontWeight: 'bold' }}>{attach.title}</span>
+                </QuoteBase>
+                <QuoteBase color={`#${attach.color || 'ddd'}`}>
+                  <TextComponents message={attach.text || ''}/>
+                </QuoteBase>
+              </span>
+            ))}
+            {message.files?.map((file, idx) => (
+              <BlockBase key={idx} color="">
+                <Typography style={{ fontWeight: 'bold' }}>{file.title}</Typography>
+                {file.preview_plain_text}
+              </BlockBase>
+            ))}
+          </Box>
         </Stack>
       </Stack>
     </Box>

@@ -1,12 +1,5 @@
 import {
-  Parser,
-  regex,
-  alt,
-  string,
-  letters,
-  newline,
-  makeFailure,
-  makeSuccess, whitespace, Node as PNode,
+  Parser, regex, alt, string, newline, whitespace, Node as PNode, letters, oneOf,
 } from 'parsimmon'
 
 export type NodeNames = 'mention' | 'quote' | 'link' | 'bold' | 'code' | 'codeBlock' | 'italic' | 'strikethrough'
@@ -26,16 +19,16 @@ const element = () => {
     code(),
     italic(),
     strikethrough(),
-    newline,
-    whitespace,
-    regex(/[^ \n]+/),
+    separateChar(),
+    leftChars(),
   )
 }
 
 const mention = () => {
   return alt(
     userMention(),
-    groupMention(),
+    teamMention(),
+    reservedMention(),
   )
 }
 
@@ -45,7 +38,15 @@ const userMention = () => {
     .node('mention')
 }
 
-const groupMention = () => {
+const teamMention = () => {
+  // 一旦IDは捨てる
+  return regex(/[0-9A-Z]+\|@([^>]+)/, 1)
+    .wrap(string('<!subteam^'), string('>'))
+    .node('mention')
+}
+
+// ex) here / channel / everyone
+const reservedMention = () => {
   return letters
     .wrap(string('<!'), string('>'))
     .node('mention')
@@ -76,7 +77,8 @@ const code = () => {
 }
 
 const codeBlock = () => {
-  return regex(/^```([\s\S]+)```\n?/, 1)
+  // TODO: link考慮
+  return regex(/^```([\s\S]+?)```\n?/, 1)
     .node('codeBlock')
 }
 
@@ -92,12 +94,14 @@ const strikethrough = () => {
     .node('strikethrough')
 }
 
-const bol = () => {
-  return Parser((input, index) => {
-    if (index === 0 || input.charAt(index - 1) === '\n') {
-      return makeSuccess(index, '')
-    } else {
-      return makeFailure(index, 'current position is not beginning of line')
-    }
-  })
+const separateChar = () => {
+  return alt(
+    newline,
+    whitespace,
+    string('<'),
+  )
+}
+
+const leftChars = () => {
+  return regex(/[^\n <]+/)
 }
