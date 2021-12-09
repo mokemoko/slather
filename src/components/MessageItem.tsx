@@ -19,10 +19,10 @@ const MessageItem = ({ message }: Props): JSX.Element => {
         <Stack direction="column" sx={{ flexGrow: 1 }}>
           <Stack direction="row" alignItems="center" spacing={1}>
             <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>{message.username}</Typography>
-            {message.bot_id && (
+            {message.botType && (
               <Chip
                 size="small"
-                label="アプリ"
+                label={message.botType}
                 sx={{ height: 18, borderRadius: 0.5, fontSize: 11 }}
               />
             )}

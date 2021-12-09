@@ -1,23 +1,32 @@
 import {
   AuthTestResponse,
   BotsInfoResponse,
-  ConversationsHistoryResponse,
+  ConversationsHistoryResponse, ConversationsRepliesResponse,
   UsersProfileGetResponse,
 } from '@slack/web-api'
 import axios from 'axios'
 import { UserServiceInfo } from '../models/user'
 import { get, set } from '../utils/cache'
-import { Message, message2vm } from '../models/message'
+import { errorMessage, Message, message2vm } from '../models/message'
 import { sequential } from '../utils/promise'
 
 const baseUrl = 'https://slack.com/api/'
+
 
 export interface SlackUserInfo {
   username: string
   icons: {
     image_64: string
-  }
+  },
+  botType?: 'アプリ' | 'ワークフロー'
 }
+
+const emptySlackUserInfo: SlackUserInfo = {
+  username: '',
+  icons: {
+    image_64: '',
+  },
+} as const
 
 class Slack {
   team: string
@@ -60,7 +69,8 @@ class Slack {
       set(user, info)
       return info
     } else {
-      throw res.error
+      console.warn(res.error)
+      return { ...emptySlackUserInfo, username: user }
     }
   }
 
@@ -70,17 +80,19 @@ class Slack {
       return cache
     }
     const res = await this.post<BotsInfoResponse>('bots.info', { bot })
-    if (res.ok) {
-      const info = {
-        username: res.bot?.name || '',
+    if (res.ok && res.bot) {
+      const info: SlackUserInfo = {
+        username: res.bot.name || '',
         icons: {
-          image_64: res.bot?.icons?.image_48 || '',
+          image_64: res.bot.icons?.image_48 || '',
         },
+        botType: (res.bot as any).is_workflow_bot ? 'ワークフロー' : 'アプリ',
       }
       set(bot, info)
       return info
     } else {
-      throw res.error
+      console.warn(res.error)
+      return { ...emptySlackUserInfo, username: bot }
     }
   }
 
@@ -100,14 +112,19 @@ class Slack {
     }
   }
 
-  private async fetchMassages(channel: string, ts: string, limit: number) {
+  private async fetchMassages(channel: string, ts: string, limit: number, reply: boolean) {
     const params = {
       channel,
       oldest: ts,
       limit,
       inclusive: true,
     }
-    const res = await this.post<ConversationsHistoryResponse>('conversations.history', params)
+    let res: ConversationsHistoryResponse | ConversationsRepliesResponse
+    if (reply) {
+      res = await this.post<ConversationsRepliesResponse>('conversations.replies', { ...params, ts })
+    } else {
+      res = await this.post<ConversationsHistoryResponse>('conversations.history', params)
+    }
     if (res.ok && res.messages) {
       console.log(res.messages)
       return sequential(res.messages.map(message => async () => {
@@ -123,30 +140,32 @@ class Slack {
         return message2vm(this.team, channel, message)
       }))
     } else {
-      throw res.error
+      return [errorMessage]
     }
   }
 
   private parseUrl(url: string) {
-    const [channel, pts] = url.split('/').slice(-2)
+    const { pathname, search } = new URL(url)
+    const [channel, pts] = pathname.split('/').slice(-2)
     const ts = `${pts.slice(1, -6)}.${pts.slice(-6)}`
-    return { channel, ts }
+    return { channel, ts, reply: !!search }
   }
 
   async fetchMessageFromUrl(url: string) {
-    const { channel, ts } = this.parseUrl(url)
+    const { channel, ts, reply } = this.parseUrl(url)
     const cache = get<Message>(`${channel}.${ts}`)
     if (cache) {
       return message2vm(this.team, channel, cache)
     } else {
-      const [message] = await this.fetchMassages(channel, ts, 1)
+      const [message] = await this.fetchMassages(channel, ts, 1, reply)
       return message
     }
   }
 
   async fetchMessagesFromUrl(url: string, limit: number = 20) {
-    const { channel, ts } = this.parseUrl(url)
-    const messages = await this.fetchMassages(channel, ts, limit)
+    const { channel, ts, reply } = this.parseUrl(url)
+    const messages = await this.fetchMassages(channel, ts, limit, reply)
+    // order by ts desc
     return messages.reverse()
   }
 }

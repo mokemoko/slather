@@ -6,7 +6,14 @@ export type MessageViewModel = Message & {
   avatarUrl?: string,
   date: string,
   link: string,
+  botType?: 'アプリ' | 'ワークフロー',
 }
+
+export const errorMessage: MessageViewModel = {
+  text: '表示できないメッセージです',
+  date: '',
+  link: '',
+} as const
 
 // util
 
