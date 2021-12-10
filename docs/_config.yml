@@ -1,0 +1,7 @@
+domain: mokemoko.github.io
+baseurl: /slather
+url: https://mokemoko.github.io
+
+collections:
+  feeds:
+    output: true

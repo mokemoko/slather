@@ -1,0 +1,16 @@
+---
+---
+[
+  {%- assign sortedFeeds = site.feeds | sort: "created" | reverse %}
+  {%- for feed in sortedFeeds %}
+    {
+      "title": {{ feed.title | jsonify }},
+      "description": {{ feed.description | jsonify }},
+      "author_id": {{ feed.author | jsonify }},
+      "created_ms": {{ feed.created | to_integer }},
+      "sha": {{ feed. sha }},
+      "url": {{ feed.url | jsonify }}
+    }
+    {%- unless forloop.last %},{% endunless %}
+  {%- endfor %}
+]
