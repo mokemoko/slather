@@ -16,6 +16,7 @@ import { useRecoilState } from 'recoil'
 import { userState } from '../services/state'
 import Slack from '../services/slack'
 import GitHub from '../services/github'
+import env from '../utils/env'
 
 type InputType = 'Slack' | 'GitHub'
 
@@ -136,7 +137,7 @@ const UserMenu = () => {
           <Link
             target="_blank"
             rel="noreferrer"
-            href={currentInput === 'Slack' ? import.meta.env.VITE_SLACK_TOKEN_LINK : import.meta.env.VITE_GITHUB_TOKEN_LINK}
+            href={currentInput === 'Slack' ? env.slackTokenLink : env.gitHubTokenLink}
           >
             ここ
           </Link>

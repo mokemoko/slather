@@ -1,9 +1,10 @@
 import type { Feed } from '../../models/feed'
+import env from '../../utils/env'
 
 export const apiPath4content = (feed: Feed) => [
   'repos',
-  import.meta.env.VITE_GITHUB_ORGANIZATION,
-  import.meta.env.VITE_GITHUB_REPOSITORY,
+  env.gitHubOrganization,
+  env.gitHubRepository,
   'contents',
   `docs/_feeds/${feed.created_ms}.json`,
 ].join('/')

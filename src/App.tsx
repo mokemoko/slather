@@ -7,6 +7,7 @@ import { Container, createTheme, CssBaseline, ThemeProvider } from '@mui/materia
 import { grey } from '@mui/material/colors'
 import Navigation from './components/Navigation'
 import ErrorBoundary from './components/ErrorBoundary'
+import env from './utils/env'
 
 const theme = createTheme({
   palette: {
@@ -20,7 +21,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <ErrorBoundary>
-        <BrowserRouter>
+        <BrowserRouter basename={env.routeBase}>
           <Navigation/>
           <Container component="main" maxWidth="lg" sx={{ mt: 4 }}>
             <CssBaseline/>

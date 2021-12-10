@@ -6,6 +6,7 @@ import { sequential } from '../../utils/promise'
 import { feed2vm } from '../../models/feed'
 import { feedTemplate, apiPath4content } from './util'
 import { UserServiceInfo } from '../../models/user'
+import env from '../../utils/env'
 
 interface GitHubUserInfo {
   id: string
@@ -29,10 +30,10 @@ class GitHub {
       this.token = param.githubInfo?.token
     }
     this.pageClient = axios.create({
-      baseURL: import.meta.env.VITE_GITHUB_PAGES_BASE,
+      baseURL: env.gitHubPagesBase,
     })
     this.apiClient = axios.create({
-      baseURL: import.meta.env.VITE_GITHUB_API_BASE,
+      baseURL: env.gitHubApiBase,
       headers: {
         Authorization: `token ${this.token}`,
       },
