@@ -4,6 +4,7 @@ import { visualizer } from 'rollup-plugin-visualizer'
 
 export default defineConfig(({ mode }) => {
   return {
+    base: './',
     jsx: 'react',
     plugins: [react()],
     server: {
@@ -11,10 +12,12 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       rollupOptions: {
+        output: {
+          dir: 'docs'
+        },
         plugins: [
           visualizer({
             open: true,
-            filename: 'docs/stats.html',
             gzipSize: true,
             brotliSize: true,
           }),

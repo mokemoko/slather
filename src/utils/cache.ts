@@ -10,7 +10,7 @@ const cache = new LRU<string, any>({
 
 const data = localStorage.getItem(STORE_KEY)
 try {
-  const dump = JSON.parse(data || '')
+  const dump = JSON.parse(data || '{}')
   cache.load(dump)
 } catch (e) {
   console.error(e)
